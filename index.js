@@ -82,7 +82,6 @@ if(command === "suggestions"){
         m.react("👎");
         sugerencias_channels.establecer(`${suggestnueva}`)
         sugerencias_channels.establecer(`${m.id}`);
-      sugerencias_channels.establecer(`${suggestnueva}`);
     })
 }
 } else if(command === "approve"){
@@ -107,7 +106,16 @@ if(command === "suggestions"){
         .setThumbnail(message.guild.iconURL({dynamic: true, format: "jpg"}))
         message.channel.send(embedID)
     }
-     if(!sugerencias_channels.tiene(`${message.guild.id}`,`${sugerenciaID}`)){
+    else if(isNaN(sugerenciaID)) {
+     const embedNaN = new Discord.MessageEmbed()
+     .setAuthor(message.author.tag, message.author.displayAvatarURL({dynamic: true, format: "jpg"}))
+     .setDescription("Debes poner una ID válida, no letras ni simbolos.")
+     .setColor("RANDOM")
+     .setFooter("Módulo de sugerencias.", client.user.displayAvatarURL())
+     .setThumbnail(message.guild.iconURL({dynamic: true, format: "jpg"}))
+     message.channel.send(embedNaN)
+    }
+    else if(!sugerencias_channels.tiene(`${message.guild.id}`,`${sugerenciaID}`)){
         const nohayID = new Discord.MessageEmbed()
         .setAuthor(message.author.tag, message.author.displayAvatarURL({dynamic: true, format: "jpeg"}))
         .setDescription("Esa ID no le pertenece a ningúna sugerencia.")
@@ -116,7 +124,7 @@ if(command === "suggestions"){
         .setThumbnail(message.guild.iconURL({dynamic: true, format: "jpg"}))
         message.channel.send(nohayID)
     }
-    const canalAP = aprovadas_channels.obtener(`${message.guild.id}`)
+    const canalAP = await aprovadas_channels.tiene(`${message.guild.id}`)
     if(!canalAP){
         const embedAP = new Discord.MessageEmbed()
         .setAuthor(message.author.tag, message.author.displayAvatarURL({dynamic: true, format: "jpeg"}))
@@ -126,16 +134,65 @@ if(command === "suggestions"){
         .setFooter("Modulo de sugerencias.", client.user.displayAvatarURL())
         message.channel.send(embedAP)
     }
-  const suggestantigua = sugerencias_channels.establecer(`${suggestnueva}`);
+  var channelS = await aprovadas_channels.obtener(`${message.guild.id}`)
+  const suggestantigua = await sugerencias_channels.obtener(`${suggestnueva}`);
     const razon = args.slice(1).join(" ");
     if(sugerencias_channels.tiene(`${message.guild.id}`,`${sugerenciaID}`)){
-        const sugerenciaAP = sugerencias_channels.obtener(`${message.guild.id}`,`${sugerenciaID}`);
+        const sugerenciaAP = await sugerencias_channels.obtener(`${sugerenciaID}`);
         const embedAP = new Discord.MessageEmbed()
         .setAuthor(message.author.tag, message.author.displayAvatarURL({dynamic: true, format: "jpg"}))
         .setDescription("**Sugerencia aceptada:**\n"+sugerenciaAP+"\nSugerencia:"+suggestantigua+"\n**Razón:**\n"+razon ? razon : "No se proporciono una razón")
-        client.channels.cache.get(canalAP).send(embedAP)
+        client.channels.cache.get(channelS).send(embedAP)
     }
 }
+    else if(command == ("deny")){
+    const deniedC = await denegadas_channels.tiene(`${message.guild.id}`);
+    if(!deniedC){
+    const embedDC = new Discord.MessageEmbed()
+    .setAuthor(message.author.tag, message.author.displayAvatarURL({dynamic: true, format: "jpg"}))
+    .setDescription("No hay ningún canal establecido para enviar las sugerencias denegadas.")
+    .setColor("RANDOM")
+    .setThumbnail(message.guild.iconURL({dynamic: true, format: "jpg"}))
+    .setFooter("Módulo de sugerencias.", client.user.displayAvatarURL())
+    message.channel.send(embedDC)
+    }
+        const suggestN = args[0];
+        if(!suggestN){
+            const embedDC = new Discord.MessageEmbed()
+    .setAuthor(message.author.tag, message.author.displayAvatarURL({dynamic: true, format: "jpg"}))
+    .setDescription("Debes proporcionar la ID de la sugerencia que deseas denegar.")
+    .setColor("RANDOM")
+    .setThumbnail(message.guild.iconURL({dynamic: true, format: "jpg"}))
+    .setFooter("Módulo de sugerencias.", client.user.displayAvatarURL())
+    message.channel.send(embedDC)
+        }
+        else if(isNaN(suggestN)){
+            const embedDC = new Discord.MessageEmbed()
+    .setAuthor(message.author.tag, message.author.displayAvatarURL({dynamic: true, format: "jpg"}))
+    .setDescription("Debes proporcionar una ID válida, no letras ni simbolos.")
+    .setColor("RANDOM")
+    .setThumbnail(message.guild.iconURL({dynamic: true, format: "jpg"}))
+    .setFooter("Módulo de sugerencias.", client.user.displayAvatarURL())
+    message.channel.send(embedDC)
+        }
+        else if(!sugerencias_channels.tiene(suggestN)){
+            const embedDC = new Discord.MessageEmbed()
+    .setAuthor(message.author.tag, message.author.displayAvatarURL({dynamic: true, format: "jpg"}))
+    .setDescription("Esa ID no le pertenece a una sugerencia.")
+    .setColor("RANDOM")
+    .setThumbnail(message.guild.iconURL({dynamic: true, format: "jpg"}))
+    .setFooter("Módulo de sugerencias.", client.user.displayAvatarURL())
+    message.channel.send(embedDC)
+        }
+       const canalDNG = await denegadas_channels.obtener(`${message.guild.id}`);
+       var suggestADNG = await sugerencias_channels.obtener(`${suggestnueva}`)
+       const razonDNG = args.slice(1).join(" ");
+       var sugerenciaDNGT = await sugerencias_channels.obtener(`${suggestN}`);
+       const embedDNG = new Discord.MessageEmbed()
+      .setAuthor(message.author.tag, message.author.displayAvatarURL({dynamic: true, format: "jpg"}))
+      .setDescription(`**Sugerencia denegada:**\n${sugerenciaDNGT}\nSugerencia: ${suggestADNG}\n**Razón:** ${razonDNG ? razonDNG : "No se ha proporcionado una razón."}`)
+       client.channels.cache.get(canalDNG).send(embedDNG)
+    }
 });
 client.on("ready", () => console.log("Yo, "+client.user.username+", acabo de ser iniciado correctamente!"));
 client.login(token);
