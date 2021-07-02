@@ -192,6 +192,22 @@ if(command === "suggestions"){
       .setAuthor(message.author.tag, message.author.displayAvatarURL({dynamic: true, format: "jpg"}))
       .setDescription(`**Sugerencia denegada:**\n${sugerenciaDNGT}\nSugerencia: ${suggestADNG}\n**Razón:** ${razonDNG ? razonDNG : "No se ha proporcionado una razón."}`)
        client.channels.cache.get(canalDNG).send(embedDNG)
+    } else if(command === ("undefined")){
+    const undefinedChannel = await indecisas_channels.tiene(message.guild.id) ? indecisas_channels.obtener(message.guild.id) : return;
+        const suggestUnd = args[0];
+        if(suggestUnd === false){
+        return;
+        } else if(!suggestUnd){
+            return message.channel.send({embed: {
+            description: "Proporciona una ID de una sugerencia.",
+                color: "RANDOM",
+             author: message.author.tag,
+                thumbnail: message.guild.iconURL({dynamic: true, format: "jpg"})
+            }
+          });
+        } else if(isNaN(suggestUnd)){
+            return message.channel.send("Esa no es una ID válida.");
+        }
     }
 });
 client.on("ready", () => console.log("Yo, "+client.user.username+", acabo de ser iniciado correctamente!"));
